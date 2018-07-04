@@ -45,7 +45,7 @@ Start SNAP (Desktop UI) and find the plugin manager in the main menu at
 Then 
 * select tab **Downloaded**, 
 * click button **Add Files** and 
-* select the plugin module file `target/nbm/s3tbx-snow-<version>.nbm`. 
+* select the plugin module file `target/nbm/snap-novasar-reader-<version>.nbm`. 
 * Click **Install**, 
 * then **Close** and 
 * restart SNAP.
