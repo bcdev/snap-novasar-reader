@@ -1,0 +1,213 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head><title>Help - Import NovaSAR</title>
+
+    <link rel="stylesheet" href="style.css">
+    <style type="text/css">
+        #cssTable {
+            text-align: center;
+        }
+
+        #cssTable th, td {
+            text-align: center;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<table class="header">
+    <tbody>
+    <tr class="header">
+        <td class="header">&nbsp; Import NovaSAR</td>
+        <td class="header" align="right"><a href="general/Overview.html"><img src="images/snap_header.jpg"
+                                                                              border="0"></a></td>
+    </tr>
+    </tbody>
+</table>
+<h3>NovaSAR Instrument details</h3>
+
+<p>The 125kg SAR instrument on NovaSAR comprises a dual-polar S-Band (3200MHz centre frequency) phased array antenna and
+    a pair of cold-redundant ‘NIA’ Back-End Electronics units. The antenna has length 2.736 and height 0.958m. It is
+    sub-divided into 3 columns and 6 rows, resulting in 18 nominally identical phase centres. Each phase centre provides
+    100W of nominal transmit RF peak power, at up to 25% pulse duty ratio. It also provides beamforming components
+    (6-bit digital phase shifters and digital attenuators) in transmit and receive to facilitate correction of amplitude
+    and phase variations in the hardware and to enable elevation beamforming. It also includes the Low Noise Amplifiers
+    (LNAs) for receiving the echo signal. Transmit pulses can be horizontally or vertically polarised, and the
+    instrument can receive either in horizontal or vertical polarisation in any given echo window. The instrument
+    includes calibration paths in all phase centres to facilitate calibration for the purpose of achieving the desired
+    spatial resolution, IRF sidelobe performance and relative radiometric calibration. Absolute radiometric calibration
+    will be achieved through the use of on-ground calibration targets.</p>
+<table align="center">
+    <tr>
+        <td>
+            <p align="center"><img src="images/PayloadDeliveryTeam.png"
+                                   alt="SAR Payload Delivery Team Photo at Airbus, Portsmouth">
+                <br>SAR Payload Delivery Team Photo at Airbus, Portsmouth
+            </p>
+        </td>
+        <td>
+            <p align="center"><img src="images/AntennaElectronics.png"
+                                   alt="SAR Antenna Electronics being assembled at Airbus, Portsmouth">
+                <br>SAR Antenna Electronics being assembled at Airbus, Portsmouth</p>
+        </td>
+    </tr>
+</table>
+<p>A highly flexible mode design capability has been created for NovaSAR, enabling a wide range of imaging modes to be
+    implemented. Modes already implemented are as follows:</p>
+<table id="cssTable">
+    <tr>
+        <th>Mode Name</th>
+        <th>Spatial Resolution</th>
+        <th>Swath Width / No of swaths</th>
+        <th>Polarisation</th>
+        <th>No. of Looks</th>
+        <th>Incidence Angle Range</th>
+        <th>Spacecraft Roll Angle</th>
+    </tr>
+    <tr>
+        <td>6m_Stripmap_Near</td>
+        <td rowspan="2">6m</td>
+        <td>20km<br>9 swaths</td>
+        <td rowspan="2">Single HH or VV</td>
+        <td rowspan="2">3 (Az)</td>
+        <td>16.0-25.38&deg;</td>
+        <td>20&deg;</td>
+    </tr>
+    <tr>
+        <td>6m_Stripmap_Mid</td>
+        <td>14-20km<br>11 swaths</td>
+        <td>21.29-31.2&deg;</td>
+        <td>26&deg;</td>
+    </tr>
+    <tr>
+        <td>20m_1Pol_ScanSAR_Near</td>
+        <td rowspan="2">20m</td>
+        <td>100km</td>
+        <td rowspan="2">Single HH or VV</td>
+        <td rowspan="2">4 (2 Rg, 2 Az)</td>
+        <td>15-28.9&deg;</td>
+        <td>20&deg;</td>
+    </tr>
+    <tr>
+        <td>20m_1Pol_ScanSAR_Mid</td>
+        <td>50km</td>
+        <td>11.3-32.0&deg;</td>
+        <td>26&deg;</td>
+    </tr>
+    <tr>
+        <td>30m_1Pol_ScanSAR_Near</td>
+        <td rowspan="3">30m</td>
+        <td>150km</td>
+        <td rowspan="3">Single HH or VV</td>
+        <td rowspan="3">4 (2 Rg, 2 Az)</td>
+        <td>11.29-25.93&deg;</td>
+        <td>20&deg;</td>
+    </tr>
+    <tr>
+        <td>30m_1Pol_ScanSAR_Mid_A</td>
+        <td>55.43km</td>
+        <td>25.0-29.94&deg;</td>
+        <td rowspan="2">26&deg;</td>
+    </tr>
+    <tr>
+        <td>30m_1Pol_ScanSAR_Mid_B</td>
+        <td>55.18km</td>
+        <td>27.35-32.01&deg;</td>
+    </tr>
+    <tr>
+        <td>Maritime_A<br>(Azimuth ambiguous mode for ship detection in open ocean only)</td>
+        <td>13.69m (Az)<br>6m (Rg)</td>
+        <td>400km</td>
+        <td>Single HH</td>
+        <td>1</td>
+        <td>34.49-57.26&deg;</td>
+        <td>45&deg;</td>
+    </tr>
+    <tr>
+        <td>20m_2Pol_ScanSAR_Near_A</td>
+        <td rowspan="2">20m</td>
+        <td rowspan="2">50km</td>
+        <td rowspan="2">Dual HH and VV</td>
+        <td rowspan="2">4 (2 Rg, 2 Az)</td>
+        <td>15.0-19.96&deg;</td>
+        <td rowspan="2">20&deg;</td>
+    </tr>
+    <tr>
+        <td>20m_2Pol_ScanSAR_Near_B</td>
+        <td>19.76-24.48&deg;</td>
+    </tr>
+    <tr>
+        <td>30m_3Pol_ScanSAR_Near</td>
+        <td>30m</td>
+        <td>50km</td>
+        <td>Dual HH and VV</td>
+        <td>2 Az</td>
+        <td>15.0-20.56&deg;</td>
+        <td>20&deg;</td>
+    </tr>
+</table>
+
+<p>All these modes can image to the left or right side of the Nadir. Sensitivity, Ambiguity Ratio performance and data
+    rates based on 4-bit BAQ compression are provided separately below in graphical form.</p>
+
+
+<table align="center">
+    <tr>
+        <td><img src="images/6m_Stripmap_Near.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/6m_Stripmap_Mid.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/20m_1Pol_ScanSAR_Near.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/20m_1Pol_ScanSAR_Mid.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/30m_1Pol_ScanSAR_Near.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/30m_1Pol_ScanSAR_Mid_A.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/30m_1Pol_ScanSAR_Mid_B.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/20m_2Pol_ScanSAR_Near_A.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/20m_2Pol_ScanSAR_Near_B.png"/></td>
+    </tr>
+    <tr>
+        <td><img src="images/30m_3Pol_ScanSAR_Near.png"/></td>
+    </tr>
+</table>
+
+<p>Further information about NovaSAR can be found at:
+    <object classid="java:org.netbeans.modules.javahelp.BrowserDisplayer">
+        <param name="content" value="https://directory.eoportal.org/web/eoportal/satellite-missions/n/novasar-s">
+        <param name="text" value="eoportal.org">
+    </object>
+    <br><br><b><i>Note that mode information in this document supersedes data presented in the above eoportal
+        website.</i></b>
+</p>
+
+
+<h5>Acknowledgements:</h5>
+<pre>
+    Martin Cohen
+    SAR Payload Technical Lead & Engineering Manager
+    Airbus Defence & Space, Portsmouth, UK
+    martin.cohen@airbus.com
+
+    Phil Whittaker
+    SAR Payloads Manager
+    Surrey Satellite Technology Ltd (SSTL), Guildford, UK
+    p.whittaker@sstl.co.uk
+</pre>
+
+<br>
+<hr>
+</body>
+</html>
