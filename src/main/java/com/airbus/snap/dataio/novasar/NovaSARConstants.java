@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 by Array Systems Computing Inc. http://www.array.ca
+ * Copyright (C) 2018 by Airbus UK (ENS Portsmouth), Brockmann Consult GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
@@ -18,7 +18,7 @@ package com.airbus.snap.dataio.novasar;
 import java.io.File;
 
 /**
- * Several constants used for reading Novasar products.
+ * Several constants used for reading NovaSAR products.
  */
 class NovaSARConstants {
 
