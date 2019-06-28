@@ -5,7 +5,7 @@
 
 	<groupId>com.airbus.snap</groupId>
     <artifactId>snap-novasar-reader</artifactId>
-	<version>1.0</version>
+	<version>1.0.1-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>NovaSAR Product Reader</name>
@@ -13,8 +13,8 @@
 
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>6.0.4</snap.version>
-        <s1tbx.version>6.0.3</s1tbx.version>
+        <snap.version>7.0.0-SNAPSHOT</snap.version>
+        <s1tbx.version>7.0.0-SNAPSHOT</s1tbx.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
 
@@ -68,11 +68,11 @@
         </dependency>
     </dependencies>
 
-	    <repositories>
+    <repositories>
         <repository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
@@ -84,11 +84,27 @@
         </repository>
     </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Repository for SNAP</name>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-releases/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
+        <snapshotRepository>
+            <id>snap-repo-public</id>
+            <name>Public Maven Snapshot Repository for SNAP</name>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-snapshot/</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
+
     <pluginRepositories>
         <pluginRepository>
             <id>snap-repo-public</id>
             <name>Public Maven Repository for SNAP</name>
-            <url>http://nexus.senbox.net/nexus/content/repositories/public/</url>
+            <url>https://snap-build-server.tilaa.cloud/nexus/repository/snap-maven-public/</url>
             <releases>
                 <enabled>true</enabled>
                 <checksumPolicy>warn</checksumPolicy>
