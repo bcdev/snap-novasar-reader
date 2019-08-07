@@ -370,7 +370,7 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
     if (calStatus.equalsIgnoreCase("CALIBRATED"))
     {
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.abs_calibration_flag, 1);
-        double calConstant = imageAttributes.getElement("CalibrationConstant").getAttributeDouble("CalibrationConstant", 1.0);
+        double calConstant = imageAttributes.getAttributeDouble("CalibrationConstant", 1.0);
         AbstractMetadata.setAttribute(absRoot, AbstractMetadata.calibration_factor, calConstant);
     }
     else
