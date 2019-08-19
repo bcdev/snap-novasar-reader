@@ -113,7 +113,6 @@ public class NovaSARProductReader extends SARReader {
             final MetadataElement absMeta = AbstractMetadata.getAbstractedMetadata(product);
             isAscending = absMeta.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
             isAntennaPointingRight = absMeta.getAttributeString(AbstractMetadata.antenna_pointing).equals("right");
-            product.setName(absMeta.getAttributeString(AbstractMetadata.PRODUCT));
             addCalibrationLUT(product);
             product.getGcpGroup();
             product.setFileLocation(fileFromInput);
@@ -203,12 +202,7 @@ public class NovaSARProductReader extends SARReader {
             return;
         }
 
-        final Document xmlDoc;
-        try {
-            xmlDoc = XMLSupport.LoadXML(is);
-        } finally {
-            is.close();
-        }
+        final Document xmlDoc = XMLSupport.LoadXML(is);
         final Element rootElement = xmlDoc.getRootElement();
 
         final Element offsetElem = rootElement.getChild("offset");

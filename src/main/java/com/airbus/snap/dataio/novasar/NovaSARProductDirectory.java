@@ -63,8 +63,8 @@ import java.util.StringTokenizer;
 //========================================================================================================================================================================================
 public class NovaSARProductDirectory extends XMLProductDirectory
 {
-    private String productName = "NovaSAR";
-    private String productType = "NovaSAR";
+    private String productName = "NovaSAR_Product";
+    private String productType = "NovaSAR-1";
     private final String productDescription = "";
     private boolean compactPolMode = false;
     final String defStr = AbstractMetadata.NO_METADATA_STRING;
@@ -153,14 +153,25 @@ private String getPol(final String imgName)
         String pol = polarizationMap.get(imgName);
         if (pol == null)
         {
-            if (imgName.contains("rh"))
+            if (imgName.contains("hh") || imgName.contains("HH"))
             {
                 compactPolMode = true;
-                return "RH";
-            } else if (imgName.contains("rv"))
+                return "HH";
+            }
+            else if (imgName.contains("vv") || imgName.contains("VV"))
             {
                 compactPolMode = true;
-                return "RV";
+                return "VV";
+            }
+            else if (imgName.contains("vh") || imgName.contains("VH"))
+            {
+                compactPolMode = true;
+                return "VH";
+            }
+            else if (imgName.contains("hv") || imgName.contains("HV"))
+            {
+                compactPolMode = true;
+                return "HV";
             }
         }
         return pol;
@@ -289,6 +300,9 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
     //================================================================================================================
     // EXTRACT PARAMETERS FROM LOADED METADATA AND COPY THEM INTO THE APPROPRIATE ENTRIES IN THE ABSTRACTED METADATA
     //================================================================================================================
+
+    // Set product name to name of data set so it appears at the top level in SNAP
+    productName = sourceAttributes.getAttributeString("InputDataSetID");
 
     // Extract Antenna Pointing (Left/Right)
     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.antenna_pointing, sourceAttributes.getAttributeString("AntennaPointing", defStr).toLowerCase());
@@ -532,7 +546,7 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
 //========================================================================================================================================================================================
 // Function to 
 //========================================================================================================================================================================================
-private void verifyProductFormat(String prodForm) throws IOException
+protected void verifyProductFormat(String prodForm) throws IOException
     {
         if (!prodForm.equalsIgnoreCase("GeoTIFF"))
         {
