@@ -434,7 +434,15 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.last_line_time, stopTime);
 
     // Extract Number of Range Looks
-    int numRangeLooks = Integer.parseInt(imageGenerationParameters.getAttributeString("NumberOfRangeLooks", defStr));
+    // Special Case for Product 29 which has different looks for its output images.
+    final MetadataElement numRangeLooksElement = imageGenerationParameters.getElement("NumberOfRangeLooks");
+    int numRangeLooks;
+    if (numRangeLooksElement != null && numRangeLooksElement.getNumAttributes() >= 2) {
+        numRangeLooks = Integer.parseInt(numRangeLooksElement.getAttributeString("NumberOfRangeLooks", defStr));
+    } else {
+        numRangeLooks = Integer.parseInt(imageGenerationParameters.getAttributeString("NumberOfRangeLooks", defStr));
+    }
+
     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.range_looks, numRangeLooks);
 
     // Extract Number of Azimuth Looks
