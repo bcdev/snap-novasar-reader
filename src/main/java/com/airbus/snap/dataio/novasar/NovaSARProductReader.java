@@ -57,9 +57,9 @@ public class NovaSARProductReader extends SARReader {
     private static final String lutgamma = "lutGamma";
     private static final String lutbeta = "lutBeta";
 
-    private boolean isAscending;
-    private boolean isAntennaPointingRight;
+	private String polarisation;
 
+	// Doesn't seem to lead anywhere? Assume only ever returns FALSE
     private static final boolean flipToSARGeometry = System.getProperty(SystemUtils.getApplicationContextId() +
             ".flip.to.sar.geometry", "false").equals("true");
 
@@ -111,15 +111,14 @@ public class NovaSARProductReader extends SARReader {
             final Product product = dataDir.createProduct();
 
             final MetadataElement absMeta = AbstractMetadata.getAbstractedMetadata(product);
-            isAscending = absMeta.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
-            isAntennaPointingRight = absMeta.getAttributeString(AbstractMetadata.antenna_pointing).equals("right");
+			polarisation = absMeta.getAttributeString(AbstractMetadata.mds1_tx_rx_polar);
             addCalibrationLUT(product);
             product.getGcpGroup();
             product.setFileLocation(fileFromInput);
             product.setProductReader(this);
 
             setQuicklookBandName(product);
-            addQuicklook(product, Quicklook.DEFAULT_QUICKLOOK_NAME, getQuicklookFile());
+            addQuicklook(product, Quicklook.DEFAULT_QUICKLOOK_NAME, getQuicklookFile(polarisation));
             addPauliQuicklooks(product);
 
             return product;
@@ -133,10 +132,11 @@ public class NovaSARProductReader extends SARReader {
         return new NovaSARProductDirectory(fileFromInput);
     }
 
-    private File getQuicklookFile() {
+    private File getQuicklookFile(final String polarisation) {
         try {
-            if(dataDir.exists(dataDir.getRootFolder() + "BrowseImage.tif")) {
-                return dataDir.getFile(dataDir.getRootFolder() + "BrowseImage.tif");
+			final String fname = "QL_image_" + polarisation + ".tif";
+            if(dataDir.exists(dataDir.getRootFolder() + fname)) {
+                return dataDir.getFile(dataDir.getRootFolder() + fname);
             }
         } catch (IOException e) {
             SystemUtils.LOG.severe("Unable to load quicklook " + dataDir.getProductName());
@@ -182,17 +182,14 @@ public class NovaSARProductReader extends SARReader {
      * @throws IOException if can't read lut
      */
     private void addCalibrationLUT(final Product product) throws IOException {
-
-        final boolean flipLUT = flipToSARGeometry && ((isAscending && !isAntennaPointingRight) || (!isAscending && isAntennaPointingRight));
         final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
 
-        readCalibrationLUT(lutsigma, origProdRoot, flipLUT);
-        readCalibrationLUT(lutgamma, origProdRoot, flipLUT);
-        readCalibrationLUT(lutbeta, origProdRoot, flipLUT);
+        readCalibrationLUT(lutsigma, origProdRoot);
+        readCalibrationLUT(lutgamma, origProdRoot);
+        readCalibrationLUT(lutbeta, origProdRoot);
     }
 
-    private void readCalibrationLUT(final String lutName, final MetadataElement root,
-                                           final boolean flipLUT) throws IOException {
+    private void readCalibrationLUT(final String lutName, final MetadataElement root) throws IOException {
         InputStream is;
         if(dataDir.exists(dataDir.getRootFolder() + lutName + ".xml")) {
             is = dataDir.getInputStream(dataDir.getRootFolder() + lutsigma + ".xml");
@@ -211,14 +208,6 @@ public class NovaSARProductReader extends SARReader {
         final Element gainsElem = rootElement.getChild("gains");
         final String gainsValue = gainsElem.getValue().trim().replace("  ", " ");
         final double[] gainsArray = toDoubleArray(gainsValue, " ");
-        if (flipLUT) {
-            double tmp;
-            for (int i = 0; i < gainsArray.length / 2; i++) {
-                tmp = gainsArray[i];
-                gainsArray[i] = gainsArray[gainsArray.length - i - 1];
-                gainsArray[gainsArray.length - i - 1] = tmp;
-            }
-        }
 
         final MetadataElement lut = new MetadataElement(lutName);
         root.addElement(lut);
@@ -258,154 +247,61 @@ public class NovaSARProductReader extends SARReader {
 
         final ImageIOFile.BandInfo bandInfo = dataDir.getBandInfo(destBand);
         if (bandInfo != null && bandInfo.img != null) {
-            if (isAscending) {
-                readAscendingRasterBand(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
-                        destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
-                        0, bandInfo.img, bandInfo.bandSampleOffset, isAntennaPointingRight);
-            } else {
-                readDescendingRasterBand(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
-                        destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
-                        0, bandInfo.img, bandInfo.bandSampleOffset, isAntennaPointingRight);
-            }
+			readRasterBand(sourceOffsetX, sourceOffsetY, sourceStepX, sourceStepY,
+					destBuffer, destOffsetX, destOffsetY, destWidth, destHeight,
+					0, bandInfo.img, bandInfo.bandSampleOffset);
         }
     }
 
-    private void readAscendingRasterBand(final int sourceOffsetX, final int sourceOffsetY,
-                                         final int sourceStepX, final int sourceStepY,
-                                         final ProductData destBuffer,
-                                         final int destOffsetX, final int destOffsetY,
-                                         final int destWidth, final int destHeight,
-                                         final int imageID, final ImageIOFile img,
-                                         final int bandSampleOffset,
-                                         final boolean isAntennaPointingRight) throws IOException {
 
+    private void readRasterBand(final int sourceOffsetX, final int sourceOffsetY,
+                                final int sourceStepX, final int sourceStepY,
+                                final ProductData destBuffer,
+                                final int destOffsetX, final int destOffsetY,
+                                final int destWidth, final int destHeight,
+                                final int imageID, final ImageIOFile img,
+                                final int bandSampleOffset) throws IOException {
+	/*
+	This function takes a strip of data and reads it into the result.
+	image.getdata reads from the source data (TIFF in our case) to give the input strip.
+	destbuffer.setElem writes that strip to the output (destination buffer)
+	*/
         final Raster data;
 
-        synchronized (dataDir) {
-            final ImageReader reader = img.getReader();
-            final ImageReadParam param = reader.getDefaultReadParam();
-            param.setSourceSubsampling(sourceStepX, sourceStepY,
-                    sourceOffsetX % sourceStepX,
-                    sourceOffsetY % sourceStepY);
+		try {
+			// synchronized block, only one thread can read from the source data at a time (why?)
+			// gets used a lot, subsamples when zoomed out.
+			synchronized (dataDir) {
+				final ImageReader reader = img.getReader();
+				final ImageReadParam param = reader.getDefaultReadParam();
+				param.setSourceSubsampling(sourceStepX, sourceStepY,
+						sourceOffsetX % sourceStepX,
+						sourceOffsetY % sourceStepY);
 
-            final RenderedImage image = reader.readAsRenderedImage(0, param);
-            if (flipToSARGeometry) {
-                if (isAntennaPointingRight) { // flip the image up side down
-                    data = image.getData(new Rectangle(destOffsetX,
-                            Math.max(0, img.getSceneHeight() - destOffsetY - destHeight),
-                            destWidth, destHeight));
-                } else { // flip the image upside down, then flip it left to right
-                    data = image.getData(new Rectangle(Math.max(0, img.getSceneWidth() - destOffsetX - destWidth),
-                            Math.max(0, img.getSceneHeight() - destOffsetY - destHeight),
-                            destWidth, destHeight));
-                }
-            } else {
-                data = image.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
-            }
-        }
+				final RenderedImage image = reader.readAsRenderedImage(0, param);
 
-        final int w = data.getWidth();
-        final int h = data.getHeight();
-        final DataBuffer dataBuffer = data.getDataBuffer();
-        final SampleModel sampleModel = data.getSampleModel();
-        final int sampleOffset = imageID + bandSampleOffset;
+				data = image.getData(new Rectangle(destOffsetX,
+						destOffsetY,
+						destWidth, destHeight));
+			}
 
-        if (flipToSARGeometry) {
-            final int[] dArray = new int[dataBuffer.getSize()];
-            sampleModel.getSamples(0, 0, w, h, imageID + bandSampleOffset, dArray, dataBuffer);
+			final int width = data.getWidth();
+			final int height = data.getHeight();
+			final DataBuffer dataBuffer = data.getDataBuffer();
+			final SampleModel sampleModel = data.getSampleModel();
+			final int sampleOffset = imageID + bandSampleOffset;
 
-            int srcStride, destStride;
-            if (isAntennaPointingRight) { // flip the image upside down
-                for (int r = 0; r < h; r++) {
-                    srcStride = r * w;
-                    destStride = (h - r - 1) * w;
-                    for (int c = 0; c < w; c++) {
-                        destBuffer.setElemIntAt(destStride + c, dArray[srcStride + c]);
-                    }
-                }
-            } else { // flip the image upside down, then flip it left to right
-                for (int r = 0; r < h; r++) {
-                    srcStride = r * w;
-                    destStride = (h - r) * w;
-                    for (int c = 0; c < w; c++) {
-                        destBuffer.setElemIntAt(destStride - c - 1, dArray[srcStride + c]);
-                    }
-                }
-            }
-        } else { // no flipping is needed
-            sampleModel.getSamples(0, 0, w, h, sampleOffset, (int[]) destBuffer.getElems(), dataBuffer);
-        }
-    }
+			if(destBuffer.getType() == ProductData.TYPE_FLOAT32) {
+				sampleModel.getSamples(0, 0, width, height, sampleOffset, (float[]) destBuffer.getElems(), dataBuffer);
+			} else {
+				sampleModel.getSamples(0, 0, width, height, sampleOffset, (int[]) destBuffer.getElems(), dataBuffer);
+			}
 
-    private void readDescendingRasterBand(final int sourceOffsetX, final int sourceOffsetY,
-                                          final int sourceStepX, final int sourceStepY,
-                                          final ProductData destBuffer,
-                                          final int destOffsetX, final int destOffsetY,
-                                          final int destWidth, final int destHeight,
-                                          final int imageID, final ImageIOFile img,
-                                          final int bandSampleOffset,
-                                          final boolean isAntennaPointingRight) throws IOException {
 
-        final Raster data;
-    try {
-        synchronized (dataDir) {
-            final ImageReader reader = img.getReader();
-            final ImageReadParam param = reader.getDefaultReadParam();
-            param.setSourceSubsampling(sourceStepX, sourceStepY,
-                    sourceOffsetX % sourceStepX,
-                    sourceOffsetY % sourceStepY);
-
-            final RenderedImage image = reader.readAsRenderedImage(0, param);
-            if (flipToSARGeometry && isAntennaPointingRight) {  // flip the image left to right
-                data = image.getData(new Rectangle(Math.max(0, img.getSceneWidth() - destOffsetX - destWidth),
-                        destOffsetY, destWidth, destHeight));
-            } else {
-                data = image.getData(new Rectangle(destOffsetX, destOffsetY, destWidth, destHeight));
-            }
-        }
-
-        final int w = data.getWidth();
-        final int h = data.getHeight();
-        final DataBuffer dataBuffer = data.getDataBuffer();
-        final SampleModel sampleModel = data.getSampleModel();
-        final int sampleOffset = imageID + bandSampleOffset;
-
-        if(destBuffer.getType() == ProductData.TYPE_FLOAT32) {
-            if (flipToSARGeometry && isAntennaPointingRight) { // flip the image left to right
-                final float[] dArray = new float[dataBuffer.getSize()];
-                sampleModel.getSamples(0, 0, w, h, sampleOffset, dArray, dataBuffer);
-
-                int srcStride, destStride;
-                for (int r = 0; r < h; r++) {
-                    srcStride = r * w;
-                    destStride = r * w + w;
-                    for (int c = 0; c < w; c++) {
-                        destBuffer.setElemFloatAt(destStride - c - 1, dArray[srcStride + c]);
-                    }
-                }
-            } else { // no flipping is needed
-                sampleModel.getSamples(0, 0, w, h, sampleOffset, (float[]) destBuffer.getElems(), dataBuffer);
-            }
-        } else {
-            if (flipToSARGeometry && isAntennaPointingRight) { // flip the image left to right
-                final int[] dArray = new int[dataBuffer.getSize()];
-                sampleModel.getSamples(0, 0, w, h, sampleOffset, dArray, dataBuffer);
-
-                int srcStride, destStride;
-                for (int r = 0; r < h; r++) {
-                    srcStride = r * w;
-                    destStride = r * w + w;
-                    for (int c = 0; c < w; c++) {
-                        destBuffer.setElemIntAt(destStride - c - 1, dArray[srcStride + c]);
-                    }
-                }
-            } else { // no flipping is needed
-                sampleModel.getSamples(0, 0, w, h, sampleOffset, (int[]) destBuffer.getElems(), dataBuffer);
-            }
-        }
-    } catch (Exception e) {
+		} catch (Exception e) {
         e.printStackTrace();
-    }
+		// throw e;
+		}
     }
 
-}
+}  // End of class definition

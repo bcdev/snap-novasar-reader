@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+
 //========================================================================================================================================================================================
 // Class to represent a NovaSAR Product Directory
 //========================================================================================================================================================================================
@@ -72,6 +73,7 @@ public class NovaSARProductDirectory extends XMLProductDirectory
 
     private static final DateFormat standardDateFormat = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	// doesn't seem to amount to anything, I assume it's part of the RS2 loader that's not included for NovaSAR
     private static final boolean flipToSARGeometry = System.getProperty(SystemUtils.getApplicationContextId() + ".flip.to.sar.geometry", "false").equals("true");
 
     private final transient Map<String, String> polarizationMap = new HashMap<>(4);
@@ -102,7 +104,8 @@ protected void addImageFile(final String imgPath, final MetadataElement newRoot)
         {
             boolean valid = false;
             int dataType = ProductData.TYPE_INT32;
-            if (name.startsWith("image")) {
+			// AFAIK, these are the only three names of files which are valid.
+            if (name.equals("image_HH.tif") || name.equals("image_VV.tif") || name.equals("image_HV.tif") || name.equals("image_VH.tif")) {
                 valid = true;
             } else if (name.startsWith("rh") || name.startsWith("rv"))
             {
@@ -185,13 +188,19 @@ protected void addBands(final Product product)
     {
 
         String bandName;
+		String betaBandName;
         boolean real = true;
         Band lastRealBand = null;
         String unit;
+		final String defStr = AbstractMetadata.NO_METADATA_STRING;
 
         final MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
+		final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
+		final MetadataElement productElem = origProdRoot.getElement("metadata");
         final int width = absRoot.getAttributeInt(AbstractMetadata.num_samples_per_line);
         final int height = absRoot.getAttributeInt(AbstractMetadata.num_output_lines);
+		final MetadataElement imageGenerationParameters = productElem.getElement("Image_Generation_Parameters");
+		final String radScaling = imageGenerationParameters.getAttributeString("RadiometricScaling");
 
         final Set<String> keys = bandImageFileMap.keySet();   // The set of keys in the map.
         for (String key : keys)
@@ -228,7 +237,8 @@ protected void addBands(final Product product)
                         }
                         else
                         {
-                            ReaderUtils.createVirtualIntensityBand(product, lastRealBand, band, '_' + getPol(imgName));
+							betaBandName = radScaling + "_Intensity_";
+                            ReaderUtils.createVirtualIntensityBand(product, lastRealBand, band, betaBandName, getPol(imgName));
                         }
                         real = !real;
                     }
@@ -244,8 +254,11 @@ protected void addBands(final Product product)
 
                         product.addBand(band);
                         bandMap.put(band, new ImageIOFile.BandInfo(band, img, i, b));
-
-                        SARReader.createVirtualIntensityBand(product, band, '_' + getPol(imgName));
+						betaBandName = radScaling + "_Amplitude_" + getPol(imgName);
+                        SARReader.createVirtualIntensityBand(product, band, getPol(imgName));
+						final String snapBandName = "Intensity" + getPol(imgName);
+						Band snapBand = product.getBand(snapBandName);
+						snapBand.setName(betaBandName);
                     }
                 }
             }
@@ -476,7 +489,7 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
 
     // Verify Product Format (e.g. GEOTIFF)
     final String pf = imageAttributes.getAttributeString("ProductFormat", defStr);
-    verifyProductFormat(pf);
+    // verifyProductFormat(pf);  // removed as wasn't really useful
 
     // Extract Number of Lines in Image
     AbstractMetadata.setAttribute(absRoot, AbstractMetadata.num_output_lines, imageAttributes.getAttributeInt("NumberOfLinesInImage", defInt));
@@ -756,6 +769,7 @@ protected void addGeoCoding(final Product product)
 
         MetadataElement absRoot = AbstractMetadata.getAbstractedMetadata(product);
         final boolean isAscending = absRoot.getAttributeString(AbstractMetadata.PASS).equals("ASCENDING");
+		// final boolean isAscending = false;
         final boolean isAntennaPointingRight = absRoot.getAttributeString(AbstractMetadata.antenna_pointing).equals("right");
 
         final MetadataElement origProdRoot = AbstractMetadata.getOriginalProductMetadata(product);
@@ -793,67 +807,6 @@ protected void addGeoCoding(final Product product)
 
                 ++i;
             }
-        }
-
-        if (flipToSARGeometry)
-          {
-            float[] flippedLatList = new float[numberOfTiepoints];
-            float[] flippedLonList = new float[numberOfTiepoints];
-            int is, id;
-            if (isAscending)
-               {
-                if (isAntennaPointingRight)
-                { // flip upside down
-                    for (int r = 0; r < gridHeight; r++)
-                    {
-                        is = r * gridWidth;
-                        id = (gridHeight - r - 1) * gridWidth;
-                        for (int c = 0; c < gridWidth; c++)
-                        {
-                            flippedLatList[id + c] = latList[is + c];
-                            flippedLonList[id + c] = lngList[is + c];
-                        }
-                    }
-                }
-                else
-                { // flip upside down then left to right
-                    for (int r = 0; r < gridHeight; r++)
-                    {
-                        is = r * gridWidth;
-                        id = (gridHeight - r) * gridWidth;
-                        for (int c = 0; c < gridWidth; c++)
-                        {
-                            flippedLatList[id - c - 1] = latList[is + c];
-                            flippedLonList[id - c - 1] = lngList[is + c];
-                        }
-                    }
-                }
-
-            }
-            else
-            { // descending
-
-                if (isAntennaPointingRight) {  // flip left to right
-                    for (int r = 0; r < gridHeight; r++)
-                    {
-                        is = r * gridWidth;
-                        id = r * gridWidth + gridWidth;
-                        for (int c = 0; c < gridWidth; c++)
-                        {
-                            flippedLatList[id - c - 1] = latList[is + c];
-                            flippedLonList[id - c - 1] = lngList[is + c];
-                        }
-                    }
-                }
-                else
-                { // no flipping is needed
-                    flippedLatList = latList;
-                    flippedLonList = lngList;
-                }
-            }
-
-            latList = flippedLatList;
-            lngList = flippedLonList;
         }
 
         double subSamplingX = (double) (product.getSceneRasterWidth() - 1) / (gridWidth - 1);
@@ -901,6 +854,7 @@ private static void setLatLongMetadata(Product product, TiePointGrid latGrid, Ti
 //========================================================================================================================================================================================
 // Function to 
 //========================================================================================================================================================================================
+
 @Override
 protected void addTiePointGrids(final Product product)
        {
@@ -970,11 +924,6 @@ protected void addTiePointGrids(final Product product)
             if (i % subSamplingX == 0)
             {
                 int index = k++;
-
-                if (!flipToSARGeometry && (isDescending && isAntennaPointingRight || (!isDescending && !isAntennaPointingRight))) {// flip
-                    index = gridWidth - 1 - index;
-                }
-
                 incidenceAngles[index] = (float) (alpha * Constants.RTOD);
             }
 
@@ -986,6 +935,7 @@ protected void addTiePointGrids(final Product product)
         }
 
         float[] incidenceAngleList = new float[gridWidth * gridHeight];
+
         for (int j = 0; j < gridHeight; j++)
         {
             System.arraycopy(incidenceAngles, 0, incidenceAngleList, j * gridWidth, gridWidth);
@@ -1086,11 +1036,7 @@ private static void addSlantRangeTime(final Product product, final MetadataEleme
         // get slant range time in nanoseconds from range distance in meters
         for (int i = 0; i < rangeDist.length; i++)
         {
-            int index = i;
-            if (!flipToSARGeometry && (isDescending && isAntennaPointingRight || !isDescending && !isAntennaPointingRight)) // flip for descending RS2
-                index = rangeDist.length - 1 - i;
-
-            rangeTime[index] = (float) (rangeDist[i] / Constants.halfLightSpeed * Constants.oneBillion); // in ns
+            rangeTime[i] = (float) (rangeDist[i] / Constants.halfLightSpeed * Constants.oneBillion); // in ns
         }
 
         final TiePointGrid slantRangeGrid = new TiePointGrid(OperatorUtils.TPG_SLANT_RANGE_TIME,gridWidth, gridHeight, 0, 0, subSamplingX, subSamplingY, rangeTime);
