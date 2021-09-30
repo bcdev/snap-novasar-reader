@@ -5,7 +5,7 @@
 
 	<groupId>com.airbus.snap</groupId>
     <artifactId>snap-novasar-reader</artifactId>
-	<version>1.1.1</version>
+	<version>1.2.0</version>
     <packaging>nbm</packaging>
 
     <name>NovaSAR Product Reader</name>
@@ -23,48 +23,102 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-core</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binio</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
 			<version>${snap.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-commons</artifactId>
 			<version>${s1tbx.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-io</artifactId>
 			<version>${s1tbx.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-		    <version>4.13.1</version>
+		    <version>4.12</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.sun</groupId>
+					<artifactId>tools</artifactId>
+				</exclusion>
+			</exclusions>
         </dependency>
     </dependencies>
 
