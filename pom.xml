@@ -28,56 +28,26 @@
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-jai</artifactId>
 			<version>${snap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-glayer</artifactId>
 			<version>${snap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>ceres-binio</artifactId>
 			<version>${snap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-core</artifactId>
 			<version>${snap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.snap</groupId>
             <artifactId>snap-engine-utilities</artifactId>
 			<version>${snap.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
 
         <dependency>
