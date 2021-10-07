@@ -5,11 +5,11 @@
 
 	<groupId>com.airbus.snap</groupId>
     <artifactId>snap-novasar-reader</artifactId>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.2.1</version>
     <packaging>nbm</packaging>
 
     <name>NovaSAR Product Reader</name>
-    <description>Enables SNAP to read NovaSAR data products.</description>
+    <description>Enables SNAP to read NovaSAR data products</description>
 
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -54,35 +54,17 @@
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-commons</artifactId>
 			<version>${s1tbx.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
         <dependency>
             <groupId>org.esa.s1tbx</groupId>
             <artifactId>s1tbx-io</artifactId>
 			<version>${s1tbx.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
 		    <version>4.13.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.sun</groupId>
-					<artifactId>tools</artifactId>
-				</exclusion>
-			</exclusions>
         </dependency>
     </dependencies>
 
