@@ -57,13 +57,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-
+import java.util.logging.Logger;
 
 //========================================================================================================================================================================================
 // Class to represent a NovaSAR Product Directory
 //========================================================================================================================================================================================
 public class NovaSARProductDirectory extends XMLProductDirectory
 {
+    private final static Logger LOG = Logger.getLogger(NovaSARProductDirectory.class.getName()); 
+    
     private String productName = "NovaSAR_Product";
     private String productType = "NovaSAR-1";
     private final String productDescription = "";
@@ -527,7 +529,7 @@ protected void addAbstractedMetadataHeader(final MetadataElement root) throws IO
     addOrbitStateVectors(absRoot, orbitData);
 
     // Add Slant Range to Ground Range Coefficients
-    if ((productType.toUpperCase().contains("GRD")) || (productType.toUpperCase().contains("SCD"))) addSRGRCoefficients(absRoot, imageGenerationParameters); // Should ONLY be called for Ground Range images as the line containing the coefficients is not present in the metadata file for slant range products!
+    if ((productType.toUpperCase().contains("GRD")) || (productType.toUpperCase().contains("SCD"))) addSRGRCoefficients(absRoot, imageGenerationParameters, sampledPixelSpacing); // Should ONLY be called for Ground Range images as the line containing the coefficients is not present in the metadata file for slant range products!
 
     // Add Doppler Centroid Coefficients (Actually just a single coefficient that is independent of time!!)
 
@@ -673,7 +675,7 @@ private static void addVector(String name, MetadataElement orbitVectorListElem,M
 //=============================================================================================================
 // Function to extract the Ground Range to Slant Range coefficients from the metadata and load them into SNAP
 //=============================================================================================================
-private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement imageGenerationParameters)
+private static void addSRGRCoefficients(final MetadataElement absRoot, final MetadataElement imageGenerationParameters, final double sampledPixelSpacing)
     {
         final MetadataElement srgrCoefficientsElem = absRoot.getElement(AbstractMetadata.srgr_coefficients);
 
@@ -700,18 +702,36 @@ private static void addSRGRCoefficients(final MetadataElement absRoot, final Met
         final String gtosrcoeffsString = imageGenerationParameters.getAttributeString("GroundToSlantRangeCoefficients");
         if (!gtosrcoeffsString.isEmpty())
                 {
+                    LOG.info("Sample pixel spacing: " + sampledPixelSpacing + "m");
+                    LOG.info("Re-scaling NovaSAR metadata SRGR coefficients (by dividing each by (sample pixel spacing)^n where (n = 0 to 5))");
+                    LOG.info("to ensure that slant-range is calculated correctly using ground-range in metres");
+                    LOG.info("Note: NovaSAR SRGR coefficients are for ground-range in pixels; SNAP expects ground-range in metres");
+                    
+                    StringBuilder originalCoeffsSb = new StringBuilder();
+                    StringBuilder rescaledCoeffsSb = new StringBuilder();
+                    
                     StringTokenizer st = new StringTokenizer(gtosrcoeffsString);
                     int cnt = 1;
                     while (st.hasMoreTokens())
                     {
                         final double coefValue = Double.parseDouble(st.nextToken());
-
+                        originalCoeffsSb.append(coefValue + " ");
+                        
+                        // Rescale the SRGR coefficients (used in the polynomial to convert ground range to slant range)
+                        // as they are for cross-track distance specified in pixels, whereas the SNAP code expects the cross-track 
+                        // distance to be specified in metres. Rescaling the SRGR coefficients in this way corrects the issue
+                        final double rescaledCoefValue = coefValue / Math.pow(sampledPixelSpacing, cnt - 1);                        
+                        rescaledCoeffsSb.append(rescaledCoefValue + " ");
+                                
                         final MetadataElement coefElem = new MetadataElement(AbstractMetadata.coefficient + '.' + cnt);
                         srgrListElem.addElement(coefElem);
                         ++cnt;
-                        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef,ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
-                        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, coefValue);
+                        AbstractMetadata.addAbstractedAttribute(coefElem, AbstractMetadata.srgr_coef, ProductData.TYPE_FLOAT64, "", "SRGR Coefficient");
+                        AbstractMetadata.setAttribute(coefElem, AbstractMetadata.srgr_coef, rescaledCoefValue);
                     }
+                    
+                    LOG.info("Original SRGR coefficients: " + originalCoeffsSb.toString());
+                    LOG.info("Rescaled SRGR coefficients: " + rescaledCoeffsSb.toString());
                 }
 
     } // End of addSRGRCoefficients()
