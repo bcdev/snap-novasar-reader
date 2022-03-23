@@ -5,7 +5,7 @@
 
 	<groupId>com.airbus.snap</groupId>
     <artifactId>snap-novasar-reader</artifactId>
-	<version>1.2.2-SNAPSHOT</version>
+	<version>1.2.2</version>
     <packaging>nbm</packaging>
 
     <name>NovaSAR Product Reader</name>
