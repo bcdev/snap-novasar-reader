@@ -20,9 +20,9 @@ package com.airbus.snap.dataio.novasar;
 
 import it.geosolutions.imageioimpl.plugins.tiff.TIFFImageReader;
 import org.apache.commons.math3.util.FastMath;
-import org.esa.s1tbx.commons.io.SARReader;
-import org.esa.s1tbx.commons.io.XMLProductDirectory;
-import org.esa.s1tbx.commons.io.ImageIOFile;
+import eu.esa.sar.commons.io.SARReader;
+import eu.esa.sar.commons.io.XMLProductDirectory;
+import eu.esa.sar.commons.io.ImageIOFile;
 
 //import org.esa.snap.core.datamodel.*; // Can this line be used to replace the next 8 lines??
 import org.esa.snap.core.datamodel.Band;
@@ -74,9 +74,6 @@ public class NovaSARProductDirectory extends XMLProductDirectory
     final int defInt = AbstractMetadata.NO_METADATA;
 
     private static final DateFormat standardDateFormat = ProductData.UTC.createDateFormat("yyyy-MM-dd HH:mm:ss");
-
-	// doesn't seem to amount to anything, I assume it's part of the RS2 loader that's not included for NovaSAR
-    private static final boolean flipToSARGeometry = System.getProperty(SystemUtils.getApplicationContextId() + ".flip.to.sar.geometry", "false").equals("true");
 
     private final transient Map<String, String> polarizationMap = new HashMap<>(4);
 
@@ -150,7 +147,7 @@ protected void addImageFile(final String imgPath, final MetadataElement newRoot)
         return reader;
     }
 
-    //========================================================================================================================================================================================
+//========================================================================================================================================================================================
 // Function to 
 //========================================================================================================================================================================================
 private String getPol(final String imgName)

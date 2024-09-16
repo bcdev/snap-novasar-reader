@@ -5,7 +5,7 @@
 
 	<groupId>com.airbus.snap</groupId>
     <artifactId>snap-novasar-reader</artifactId>
-	<version>1.2.3-SNAPSHOT</version>
+	<version>1.2.4-SNAPSHOT</version>
     <packaging>nbm</packaging>
 
     <name>NovaSAR Product Reader</name>
@@ -13,8 +13,8 @@
 
 	<properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <snap.version>9.0.0</snap.version>
-        <s1tbx.version>9.0.0</s1tbx.version>
+        <snap.version>12.0.0-SNAPSHOT</snap.version>
+        <microwavetbx.version>12.0.0-SNAPSHOT</microwavetbx.version>
         <javahelp.version>2.0.05</javahelp.version>
     </properties>
 
@@ -51,20 +51,20 @@
         </dependency>
 
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-commons</artifactId>
-			<version>${s1tbx.version}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-commons</artifactId>
+			<version>${microwavetbx.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.esa.s1tbx</groupId>
-            <artifactId>s1tbx-io</artifactId>
-			<version>${s1tbx.version}</version>
+            <groupId>eu.esa.microwavetbx</groupId>
+            <artifactId>sar-io</artifactId>
+			<version>${microwavetbx.version}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-		    <version>4.13.1</version>
+		    <version>4.13.2</version>
         </dependency>
     </dependencies>
 
@@ -119,9 +119,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>org.apache.netbeans.utilities</groupId>
                 <artifactId>nbm-maven-plugin</artifactId>
-                <version>3.14</version>
+                <version>4.4</version>
                 <extensions>true</extensions>
                 <dependencies>
                     <dependency>
@@ -138,18 +138,25 @@
             </plugin>
             <plugin>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
+                <version>3.4.0</version>
                 <configuration>
-                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                    <archive>
+                        <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.11.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
+                    <debug>true</debug>
+                    <encoding>UTF-8</encoding>
+                    <excludes>
+                        <exclude>.gitignore</exclude>
+                    </excludes>
                 </configuration>
             </plugin>
         </plugins>
