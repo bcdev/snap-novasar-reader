@@ -16,8 +16,8 @@
 package com.airbus.snap.dataio.novasar;
 
 import com.bc.ceres.core.ProgressMonitor;
-import org.esa.s1tbx.commons.io.SARReader;
-import org.esa.s1tbx.commons.io.ImageIOFile;
+import eu.esa.sar.commons.io.SARReader;
+import eu.esa.sar.commons.io.ImageIOFile;
 import org.esa.snap.core.dataio.ProductReaderPlugIn;
 import org.esa.snap.core.datamodel.Band;
 import org.esa.snap.core.datamodel.MetadataAttribute;
@@ -105,7 +105,7 @@ public class NovaSARProductReader extends SARReader {
     protected Product readProductNodesImpl() throws IOException {
 
         try {
-            final File fileFromInput = ReaderUtils.getFileFromInput(getInput());
+            final File fileFromInput = ReaderUtils.getPathFromInput(getInput()).toFile();
             dataDir = createDirectory(fileFromInput);
             dataDir.readProductDirectory();
             final Product product = dataDir.createProduct();
@@ -119,7 +119,6 @@ public class NovaSARProductReader extends SARReader {
 
             setQuicklookBandName(product);
             addQuicklook(product, Quicklook.DEFAULT_QUICKLOOK_NAME, getQuicklookFile(polarisation));
-            addPauliQuicklooks(product);
 
             return product;
         } catch (Exception e) {
@@ -142,37 +141,6 @@ public class NovaSARProductReader extends SARReader {
             SystemUtils.LOG.severe("Unable to load quicklook " + dataDir.getProductName());
         }
         return null;
-    }
-
-    private static void addPauliQuicklooks(final Product product) {
-        final InputProductValidator validator = new InputProductValidator(product);
-        if(validator.isFullPolSLC()) {
-            final Band[] pauliBands = pauliVirtualBands(product);
-            product.getQuicklookGroup().add(new Quicklook(product, "Pauli", pauliBands));
-        }
-    }
-
-    private static Band[] pauliVirtualBands(final Product product) {
-
-        final VirtualBand r = new VirtualBand("pauli_r",
-                                              ProductData.TYPE_FLOAT32,
-                                              product.getSceneRasterWidth(),
-                                              product.getSceneRasterHeight(),
-                                              "((i_HH-i_VV)*(i_HH-i_VV)+(q_HH-q_VV)*(q_HH-q_VV))/2");
-
-        final VirtualBand g = new VirtualBand("pauli_g",
-                                              ProductData.TYPE_FLOAT32,
-                                              product.getSceneRasterWidth(),
-                                              product.getSceneRasterHeight(),
-                                              "((i_HV+i_VH)*(i_HV+i_VH)+(q_HV+q_VH)*(q_HV+q_VH))/2");
-
-        final VirtualBand b = new VirtualBand("pauli_b",
-                                              ProductData.TYPE_FLOAT32,
-                                              product.getSceneRasterWidth(),
-                                              product.getSceneRasterHeight(),
-                                              "((i_HH+i_VV)*(i_HH+i_VV)+(q_HH+q_VV)*(q_HH+q_VV))/2");
-
-        return new Band[] {r, g, b};
     }
 
     /**

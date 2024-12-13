@@ -38,7 +38,7 @@ public class NovaSARProductReaderPlugIn implements ProductReaderPlugIn {
      * @return true if this product reader can decode the given input, otherwise false.
      */
     public DecodeQualification getDecodeQualification(final Object input) {
-        final File file = ReaderUtils.getFileFromInput(input);
+        final File file = ReaderUtils.getPathFromInput(input).toFile();
         if (file != null) {
             final String filename = file.getName().toLowerCase();
             if (filename.equals(NovaSARConstants.PRODUCT_HEADER_NAME)) {
